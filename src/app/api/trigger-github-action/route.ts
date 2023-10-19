@@ -1,27 +1,42 @@
-import axios, { AxiosResponse } from 'axios';
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+import axios, { AxiosResponse } from "axios";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
+  const headers = request.headers;
+
+  const authorization = request.headers.get("authorization");
+  const target = request.headers.get("target");
+  const eventType = request.headers.get("event_type");
+
+  if (!target || !authorization || !eventType) {
+    return NextResponse.json(
+      {
+        message: "Missing target or authorization or event_type",
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+
   try {
     const response: AxiosResponse = await axios.post(
-      'https://api.github.com/repos/phuoc94/trigger-vercel-deploy-with-github-actions/dispatches',
+      target,
       {
-        event_type: 'webhook',
+        event_type: eventType,
       },
       {
         headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'Authorization': `token ${process.env.GITHUB_TOKEN}`,
-          'Content-Type': 'application/json',
+          Accept: "application/vnd.github.v3+json",
+          Authorization: authorization,
+          "Content-Type": "application/json",
         },
       }
     );
-
     if (response.status >= 200 && response.status < 300) {
       return NextResponse.json(
         {
-          status: 'Sent to GitHub Actions successfully',
+          status: "Sent to GitHub Actions successfully",
         },
         {
           status: 200,
@@ -30,7 +45,7 @@ export async function POST(request: NextRequest) {
     } else {
       return NextResponse.json(
         {
-          error: 'Unexpected response from GitHub API',
+          error: "Unexpected response from GitHub API",
           statusCode: response.status,
         },
         {
@@ -41,7 +56,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     return NextResponse.json(
       {
-        error: error.message
+        error: error.message,
       },
       {
         status: 500,
@@ -49,3 +64,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
