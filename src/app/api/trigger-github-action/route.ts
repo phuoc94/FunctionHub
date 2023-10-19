@@ -6,12 +6,12 @@ export async function POST(request: NextRequest) {
 
   const authorization = request.headers.get("authorization");
   const target = request.headers.get("target");
-  const eventType = request.headers.get("event_type");
+  const eventType = request.headers.get("event-type");
 
   if (!target || !authorization || !eventType) {
     return NextResponse.json(
       {
-        message: "Missing target or authorization or event_type",
+        message: "Missing target or authorization or event-type",
       },
       {
         status: 400,
